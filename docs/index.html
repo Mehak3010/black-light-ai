@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Black Light AI - Cybersecurity Risk Assessment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            padding: 3rem 1rem;
+            text-align: center;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header .subtitle {
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-bottom: 1rem;
+        }
+        
+        header .team {
+            font-size: 0.9rem;
+            color: #667eea;
+            margin-top: 1rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        main {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        section {
+            padding: 2rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        section:last-child {
+            border-bottom: none;
+        }
+        
+        h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+        }
+        
+        h3 {
+            color: #764ba2;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+        
+        p {
+            margin-bottom: 1rem;
+            color: #555;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+        
+        .feature-card h3 {
+            color: white;
+            margin-top: 0;
+            border-left: none;
+            padding-left: 0;
+        }
+        
+        .component-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        
+        .component-table th,
+        .component-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .component-table th {
+            background-color: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .component-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .agent-role {
+            color: #764ba2;
+            font-weight: 600;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .cta-button.secondary {
+            background: #f0f0f0;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .cta-button.secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .code-block {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        .code-block code {
+            font-family: 'Courier New', monospace;
+            color: #333;
+        }
+        
+        footer {
+            background: #1a1a2e;
+            color: #aaa;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .emoji {
+            margin-right: 0.5rem;
+        }
+        
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔒 Black Light AI</h1>
+        <p class="subtitle">Autonomous Cyber Threat & Risk Intelligence</p>
+        <p class="team">Team TRIPOD: Vishwas Kura, Anirban, Mehak Aeora</p>
+        <p class="team">5-Day AI Agents Intensive with Google • November 2025</p>
+    </header>
+    
+    <div class="container">
+        <main>
+            <!-- Overview Section -->
+            <section>
+                <h2><span class="emoji">💡</span>Why Black Light AI?</h2>
+                <p>Traditional vulnerability assessment has a <strong>signal-to-noise problem</strong>. Running tools like Nmap, Nuclei, and Amass often leaves you with a huge, fragmented JSON log that still needs hours of manual triage before you can tell what actually matters.</p>
+                
+                <p>Black Light AI was built to fix three recurring bottlenecks:</p>
+                <ul>
+                    <li><strong>Information overload</strong> – Great tools, too much output. Thousands of findings with no clear prioritization.</li>
+                    <li><strong>Missing business context</strong> – A scanner sees open ports; a human sees revenue, data and reputation at risk.</li>
+                    <li><strong>Reporting fatigue</strong> – Turning raw tool output into an executive-friendly BLUF report is slow, repetitive work.</li>
+                </ul>
+                
+                <p>Black Light AI acts as a <strong>virtual security analyst</strong>: it ingests noisy scan data, reasons about risk, and produces decision-grade reports for both engineers and executives.</p>
+            </section>
+            
+            <!-- Features Section -->
+            <section>
+                <h2><span class="emoji">✨</span>Key Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>🔄 End-to-End Pipeline</h3>
+                        <p>Discovery → Scan → Parse → Enrich → Report → PDF Export</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🤖 Multi-Agent Architecture</h3>
+                        <p>Specialized roles: Scout, Hunter, Translator, Analyst, Writer</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔐 Dual Operation Modes</h3>
+                        <p>Live Scan against authorized targets or Safe Mode with pre-generated data</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📊 Logic-Based Risk Scoring</h3>
+                        <p>Combines severity, CVE presence, and confidence for accurate prioritization</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔗 CVE Enrichment</h3>
+                        <p>Automatic NVD links for each identified vulnerability</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📄 Professional Reports</h3>
+                        <p>HTML & PDF generation with multi-persona Gemini analysis</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Architecture Section -->
+            <section>
+                <h2><span class="emoji">🧱</span>Architecture Overview</h2>
+                <p>Black Light AI implements a <strong>multi-agent pipeline</strong> rather than a single, monolithic LLM prompt. This keeps each step focused, reduces context size, and improves accuracy when working with large scan logs.</p>
+                
+                <h3>Core Components</h3>
+                <table class="component-table">
+                    <thead>
+                        <tr>
+                            <th>Agent</th>
+                            <th>Role</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="agent-role">🔍 Discovery</span></td>
+                            <td>The Scout</td>
+                            <td>Performs passive reconnaissance and asset discovery using Amass</td>
+                        </tr>
+                        <tr>
+                            <td><span class="agent-role">🎯 Scanner</span></td>
+                            <td>The Hunter</td>
+                            <td>Executes safe, targeted vulnerability checks via Nuclei with rate-limiting</td>
+                        </tr>
+                        <tr>
+                            <td><span class="agent-role">📥 Ingest</span></td>
+                            <td>The Alternative</td>
+                            <td>Handles offline data loading for synthetic/safe testing environments</td>
+                        </tr>
+                        <tr>
+                            <td><span class="agent-role">🔤 Parser</span></td>
+                            <td>The Translator</td>
+                            <td>Normalizes messy tool output into structured data classes</td>
+                        </tr>
+                        <tr>
+                            <td><span class="agent-role">📈 Enricher</span></td>
+                            <td>The Analyst</td>
+                            <td>Calculates risk scores based on logic and links findings to CVE databases</td>
+                        </tr>
+                        <tr>
+                            <td><span class="agent-role">📝 Reporter</span></td>
+                            <td>The Writer</td>
+                            <td>Uses multi-persona LLMs to generate HTML and PDF reports</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            
+            <!-- Key Concepts Section -->
+            <section>
+                <h2><span class="emoji">💭</span>Key Concepts Demonstrated</h2>
+                <ul>
+                    <li>✅ <strong>Custom Tools Integration</strong> (Nuclei, Amass, WeasyPrint)</li>
+                    <li>✅ <strong>Sequential Multi-Agent Architecture</strong></li>
+                    <li>✅ <strong>Context Engineering</strong> (Context Compaction via Top-N Risk Filtering)</li>
+                    <li>✅ <strong>Logic-Based Risk Scoring</strong> (Hybrid Math + AI assessment)</li>
+                    <li>✅ <strong>Observability & Pipeline Logging</strong></li>
+                    <li>✅ <strong>Dual-Mode Operation</strong> (Live Scanning vs. Offline/Safe Mode)</li>
+                    <li>✅ <strong>Multi-Persona Content Generation</strong> (Gemini 2.5 Pro & Flash)</li>
+                    <li>✅ <strong>Automated Artifact Generation</strong> (HTML & PDF Reporting)</li>
+                    <li>✅ <strong>Data Normalization & Structured Output</strong></li>
+                    <li>✅ <strong>Safety Guardrails</strong> (Rate limiting & Environment variable scrubbing)</li>
+                </ul>
+            </section>
+            
+            <!-- Getting Started Section -->
+            <section>
+                <h2><span class="emoji">🚀</span>Getting Started</h2>
+                <h3>Quick Start</h3>
+                <p>Clone the repository and open the Jupyter notebook to begin:</p>
+                <div class="code-block">
+                    <code>git clone https://github.com/ItsYourAnirban/Black-Light-Ai.git<br>
+                    cd Black-Light-Ai<br>
+                    jupyter notebook BlackLightAI.ipynb</code>
+                </div>
+                
+                <h3>Prerequisites</h3>
+                <ul>
+                    <li>Python 3.8+</li>
+                    <li>Jupyter Notebook or JupyterLab</li>
+                    <li>Google API Key (for Gemini access)</li>
+                    <li>System tools: Nmap, Go, Nuclei, Amass</li>
+                </ul>
+                
+                <h3>Configuration</h3>
+                <p>The main notebook includes configuration cells that allow you to:</p>
+                <ul>
+                    <li>Set <code>RUN_LIVE_SCAN</code> to enable/disable live scanning</li>
+                    <li>Define <code>TARGET_DOMAIN</code> for reconnaissance</li>
+                    <li>Enable <code>SAFE_MODE</code> for offline testing</li>
+                    <li>Configure output directories and rate limits</li>
+                </ul>
+            </section>
+            
+            <!-- Tech Stack Section -->
+            <section>
+                <h2><span class="emoji">⚙️</span>Technology Stack</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <div>
+                        <h3>AI & LLM</h3>
+                        <p>
+                            <span class="badge">Google Gemini 2.5 Pro</span><br>
+                            <span class="badge">Google Gemini Flash</span>
+                        </p>
+                    </div>
+                    <div>
+                        <h3>Security Tools</h3>
+                        <p>
+                            <span class="badge">Nuclei</span><br>
+                            <span class="badge">Amass</span><br>
+                            <span class="badge">Nmap</span>
+                        </p>
+                    </div>
+                    <div>
+                        <h3>Data Processing</h3>
+                        <p>
+                            <span class="badge">Python 3.8+</span><br>
+                            <span class="badge">JSONL/JSON</span><br>
+                            <span class="badge">Dataclasses</span>
+                        </p>
+                    </div>
+                    <div>
+                        <h3>Report Generation</h3>
+                        <p>
+                            <span class="badge">WeasyPrint</span><br>
+                            <span class="badge">HTML Templates</span><br>
+                            <span class="badge">CSS Styling</span>
+                        </p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Links Section -->
+            <section>
+                <h2><span class="emoji">🔗</span>Resources & Links</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <a href="https://github.com/ItsYourAnirban/Black-Light-Ai" class="cta-button">
+                        <span class="emoji">📦</span>View on GitHub
+                    </a>
+                    <a href="https://github.com/ItsYourAnirban/Black-Light-Ai/blob/main/BlackLightAI.ipynb" class="cta-button">
+                        <span class="emoji">📓</span>Open Notebook
+                    </a>
+                    <a href="https://github.com/ItsYourAnirban/Black-Light-Ai/blob/main/README.md" class="cta-button">
+                        <span class="emoji">📖</span>Full Documentation
+                    </a>
+                </div>
+            </section>
+            
+            <!-- About Section -->
+            <section>
+                <h2><span class="emoji">👥</span>About the Team</h2>
+                <p><strong>Team TRIPOD</strong> developed Black Light AI as part of the <strong>5-Day AI Agents Intensive with Google</strong> in November 2025.</p>
+                <p>The project demonstrates enterprise-grade multi-agent system design applied to cybersecurity automation, showcasing how classic offensive security tools can be orchestrated with Gemini-powered agents to produce production-ready security reports.</p>
+                
+                <h3>Team Members</h3>
+                <ul>
+                    <li><strong>Vishwas Kura</strong> - Multi-Agent Architecture & Security Tool Integration</li>
+                    <li><strong>Anirban</strong> - Risk Scoring & Data Enrichment</li>
+                    <li><strong>Mehak Aeora</strong> - Report Generation & UI/UX</li>
+                </ul>
+            </section>
+        </main>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 Black Light AI • Team TRIPOD</p>
+        <p>Part of the <a href="#">5-Day AI Agents Intensive with Google</a></p>
+        <p style="margin-top: 1rem; font-size: 0.9rem;">
+            <a href="https://github.com/ItsYourAnirban/Black-Light-Ai">GitHub Repository</a> • 
+            <a href="#">License</a>
+        </p>
+    </footer>
+</body>
+</html>
