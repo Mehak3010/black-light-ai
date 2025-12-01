@@ -109,9 +109,7 @@ HTML_TEMPLATE = r"""
 </body>
 </html>
 """
-
 def reporter_agent(findings: List[Finding], site_name: str, target_url: str) -> str:
-    # Simple HTML Table Output (Report 1 Style)
     rows = ""
     for f in findings:
         rows += (
@@ -131,7 +129,7 @@ def reporter_agent(findings: List[Finding], site_name: str, target_url: str) -> 
   <title>Security Report - {html_escape(site_name)}</title>
 </head>
 <body>
-  <h1>Security Report for {html_escape(site_name)}</h1>
+  <h1>Security Report - {html_escape(site_name)}</h1>
   <h3>Findings:</h3>
   <table border='1' cellpadding='6'>
     <tr>
@@ -173,14 +171,17 @@ def generate_report():
     site_name = host or "ExampleSite"
 
     scan_path = UPLOADED_SCAN_PATH if os.path.isfile(UPLOADED_SCAN_PATH) else RAW_SCAN_PATH
+
     findings = parser_agent(scan_path, host if host else None)
     if not findings:
         findings = parser_agent(scan_path, None)
 
     findings = enrich_and_score_agent(findings)
-    reporter_agent(findings, site_name=site_name, target_url=url)
 
-    return jsonify({"status": "ok", "message": "Report generated"}), 200
+    report_path = reporter_agent(findings, site_name=site_name, target_url=url)
+
+    return send_file(report_path, mimetype="text/html", as_attachment=True,
+                     download_name="report.html")
 
 @app.get("/api/latest")
 def get_latest():
