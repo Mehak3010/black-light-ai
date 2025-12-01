@@ -1,0 +1,30 @@
+[
+  {
+    "title": "Weak Cipher Suites Detection",
+    "severity": "low",
+    "host": "demo.testfire.net",
+    "evidence": "[tls10 TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA]",
+    "template_id": "weak-cipher-suites",
+    "timestamp": "2025-11-30T04:05:41.198898109Z",
+    "cve_ids": [],
+    "cve_links": [],
+    "cvss": null,
+    "confidence": "low",
+    "risk_score": 0.0,
+    "notes": ""
+  },
+  {
+    "title": "Weak Cipher Suites Detection",
+    "severity": "low",
+    "host": "demo.testfire.net",
+    "evidence": "[tls11 TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA]",
+    "template_id": "weak-cipher-suites",
+    "timestamp": "2025-11-30T04:05:41.62729596Z",
+    "cve_ids": [],
+    "cve_links": [],
+    "cvss": null,
+    "confidence": "low",
+    "risk_score": 0.0,
+    "notes": ""
+  }
+]
