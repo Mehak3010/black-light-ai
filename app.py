@@ -16,14 +16,14 @@ UPLOADED_SCAN_PATH = os.path.join(OUTPUT_DIR, "uploaded_scan.jsonl")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # ───────────────────────────────────────────────────────────── #
-#   Your Original Logic (Parser + Scoring + Reporter)
+#   Parser & Scoring Logic
 # ───────────────────────────────────────────────────────────── #
 def html_escape(s: str) -> str:
     return (
         s.replace("&", "&amp;")
-         .replace("<", "&lt;")
-         .replace(">", "&gt;")
-         .replace('"', "&quot;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
     )
 
 def json_write(obj, path: str) -> None:
@@ -49,15 +49,19 @@ def parser_agent(scan_path: str, target_host: Optional[str]) -> List[Finding]:
     findings: List[Finding] = []
     if not os.path.isfile(scan_path):
         return findings
+
     with open(scan_path, "r", encoding="utf-8") as f:
         for line in f:
             try:
                 obj = json.loads(line.strip())
             except:
                 continue
+
             host = obj.get("host") or obj.get("matched-at") or ""
+
             if target_host and target_host not in host:
                 continue
+
             info = obj.get("info", {})
             findings.append(Finding(
                 title=info.get("name") or obj.get("template-id") or "Finding",
@@ -66,9 +70,11 @@ def parser_agent(scan_path: str, target_host: Optional[str]) -> List[Finding]:
                 evidence=", ".join(obj.get("extracted-results", [])[:1]),
                 template_id=obj.get("template-id") or obj.get("template") or "",
                 timestamp=obj.get("timestamp") or "",
-                cve_ids=[], cve_links=[], cvss=None,
-                confidence="low", risk_score=0.0, notes=""
+                cve_ids=[], cve_links=[],
+                cvss=None, confidence="low",
+                risk_score=0.0, notes=""
             ))
+
     json_write([asdict(f) for f in findings], os.path.join(OUTPUT_DIR, "findings.json"))
     return findings
 
@@ -79,21 +85,60 @@ def enrich_and_score_agent(findings: List[Finding]) -> List[Finding]:
         cves = set(re.findall(r"CVE-\d{4}-\d{4,7}", f.title))
         f.cve_ids = sorted(cves)
         f.cve_links = [f"https://nvd.nist.gov/vuln/detail/{c}" for c in f.cve_ids]
-        f.risk_score = round(min(10.0, SEV_BASE.get(f.severity, 0) * 1.0 + (1.0 if f.cve_ids else 0)), 2)
-    json_write([asdict(x) for x in findings], os.path.join(OUTPUT_DIR, "findings_scored.json"))
+        base = SEV_BASE.get(f.severity, 0)
+        bonus = 1.0 if f.cve_ids else 0.0
+        f.risk_score = round(min(10.0, base * 1.0 + bonus), 2)
+
+    json_write([asdict(f) for f in findings], os.path.join(OUTPUT_DIR, "findings_scored.json"))
     return findings
 
-# Include your entire HTML_TEMPLATE + reporter_agent here (unchanged)
+# ───────────────────────────────────────────────────────────── #
+#   HTML Report Engine
+# ───────────────────────────────────────────────────────────── #
+HTML_TEMPLATE = r"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Security Report - {{SITE_NAME}}</title>
+</head>
+<body>
+  <h1>Security Report for {{SITE_NAME}}</h1>
+  <h3>Findings:</h3>
+  {{FINDINGS_TABLE}}
+</body>
+</html>
+"""
+
+def reporter_agent(findings: List[Finding], site_name: str, target_url: str) -> str:
+    rows = []
+    for f in findings[:10]:
+        rows.append(
+            f"<tr><td>{html_escape(f.title)}</td><td>{html_escape(f.severity)}</td>"
+            f"<td>{html_escape(f.host)}</td><td>{f.risk_score}</td></tr>"
+        )
+
+    table_html = "<table border='1' cellpadding='6'><tr><th>Title</th><th>Severity</th><th>Host</th><th>Risk</th></tr>" + \
+                 "".join(rows) + "</table>"
+
+    html_out = HTML_TEMPLATE\
+        .replace("{{SITE_NAME}}", html_escape(site_name))\
+        .replace("{{FINDINGS_TABLE}}", table_html)
+
+    path = os.path.join(OUTPUT_DIR, "report.html")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(html_out)
+
+    return path
 
 # ───────────────────────────────────────────────────────────── #
-#   Flask App Setup
+#   Flask App Routes
 # ───────────────────────────────────────────────────────────── #
 app = Flask(__name__, template_folder="templates")
 
 def latest_artifact() -> Optional[str]:
-    pdf = os.path.join(OUTPUT_DIR, "report.pdf")
     html = os.path.join(OUTPUT_DIR, "report.html")
-    return pdf if os.path.isfile(pdf) else html if os.path.isfile(html) else None
+    return html if os.path.isfile(html) else None
 
 @app.get("/")
 def home():
@@ -107,25 +152,26 @@ def generate_report():
 
     host = (urlparse(url).hostname or "")
     site_name = host or "ExampleSite"
+
     scan_path = UPLOADED_SCAN_PATH if os.path.isfile(UPLOADED_SCAN_PATH) else RAW_SCAN_PATH
-
     findings = parser_agent(scan_path, host if host else None)
-    if not findings: findings = parser_agent(scan_path, None)
-    
-    findings = enrich_and_score_agent(findings)
-    report_html = reporter_agent(findings, site_name=site_name, target_url=url)
+    if not findings:
+        findings = parser_agent(scan_path, None)
 
-    return jsonify({"status": "ok", "message": "Report generated"})
+    findings = enrich_and_score_agent(findings)
+    reporter_agent(findings, site_name=site_name, target_url=url)
+
+    return jsonify({"status": "ok", "message": "Report generated"}), 200
 
 @app.get("/api/latest")
 def get_latest():
     path = latest_artifact()
     if not path:
-        return jsonify({"error": "no report"}), 404
-    return send_file(path, as_attachment=True, download_name=os.path.basename(path))
+        return jsonify({"error": "No report available"}), 404
+    return send_file(path, as_attachment=True, download_name="report.html")
 
 # ───────────────────────────────────────────────────────────── #
-#   Start server correctly for Render
+#   Start Server (Render compatible)
 # ───────────────────────────────────────────────────────────── #
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
