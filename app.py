@@ -111,25 +111,44 @@ HTML_TEMPLATE = r"""
 """
 
 def reporter_agent(findings: List[Finding], site_name: str, target_url: str) -> str:
-    rows = []
-    for f in findings[:10]:
-        rows.append(
-            f"<tr><td>{html_escape(f.title)}</td><td>{html_escape(f.severity)}</td>"
-            f"<td>{html_escape(f.host)}</td><td>{f.risk_score}</td></tr>"
+    # Simple HTML Table Output (Report 1 Style)
+    rows = ""
+    for f in findings:
+        rows += (
+            f"<tr>"
+            f"<td>{html_escape(f.title)}</td>"
+            f"<td>{html_escape(f.severity)}</td>"
+            f"<td>{html_escape(f.host)}</td>"
+            f"<td>{f.risk_score}</td>"
+            f"</tr>"
         )
 
-    table_html = "<table border='1' cellpadding='6'><tr><th>Title</th><th>Severity</th><th>Host</th><th>Risk</th></tr>" + \
-                 "".join(rows) + "</table>"
-
-    html_out = HTML_TEMPLATE\
-        .replace("{{SITE_NAME}}", html_escape(site_name))\
-        .replace("{{FINDINGS_TABLE}}", table_html)
-
-    path = os.path.join(OUTPUT_DIR, "report.html")
-    with open(path, "w", encoding="utf-8") as f:
+    html_out = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Security Report - {html_escape(site_name)}</title>
+</head>
+<body>
+  <h1>Security Report for {html_escape(site_name)}</h1>
+  <h3>Findings:</h3>
+  <table border='1' cellpadding='6'>
+    <tr>
+      <th>Title</th>
+      <th>Severity</th>
+      <th>Host</th>
+      <th>Risk</th>
+    </tr>
+    {rows}
+  </table>
+</body>
+</html>
+"""
+    report_path = os.path.join(OUTPUT_DIR, "report.html")
+    with open(report_path, "w", encoding="utf-8") as f:
         f.write(html_out)
-
-    return path
+    return report_path
 
 # ───────────────────────────────────────────────────────────── #
 #   Flask App Routes
