@@ -5,10 +5,15 @@ from dataclasses import dataclass, asdict
 from typing import List, Optional
 from urllib.parse import urlparse
 from flask import Flask, request, send_file, jsonify, render_template
+import subprocess
+import shutil
+import tempfile
 
 OUTPUT_DIR = os.path.join(os.getcwd(), "artifacts")
 RAW_SCAN_PATH = os.path.join(os.getcwd(), "scan.jsonl")
 UPLOADED_SCAN_PATH = os.path.join(OUTPUT_DIR, "uploaded_scan.jsonl")
+BIN_DIR = os.path.join(os.getcwd(), "bin")
+NUCLEI_TEMPLATES_DIR = os.path.join(os.getcwd(), "nuclei-templates")
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -290,6 +295,222 @@ app = Flask(__name__, template_folder="templates")
 def root():
     return render_template("index.html")
 
+def discover_assets(host: str) -> List[str]:
+    path = shutil.which("amass")
+    if not path:
+        local = os.path.join(BIN_DIR, "amass.exe")
+        if os.path.isfile(local):
+            path = local
+    if not path:
+        return [host]
+    try:
+        out = subprocess.run([path, "enum", "-d", host, "-silent", "-passive"], capture_output=True, text=True, timeout=180)
+        lines = [x.strip() for x in out.stdout.splitlines() if x.strip()]
+        uniq = list({*lines, host})
+        if len(uniq) > 50:
+            uniq = uniq[:50]
+        return uniq
+    except:
+        return [host]
+
+def run_nuclei(assets: List[str]) -> Optional[str]:
+    path = shutil.which("nuclei")
+    if not path:
+        local = os.path.join(BIN_DIR, "nuclei.exe")
+        if os.path.isfile(local):
+            path = local
+    if not path:
+        return None
+    fd, p = tempfile.mkstemp(text=True)
+    try:
+        with open(fd, "w") as f:
+            f.write("\n".join(assets))
+        out_path = os.path.join(OUTPUT_DIR, "live_scan.jsonl")
+        try:
+            cmd = [path, "-l", p, "-jsonl", "-o", out_path, "-silent", "-stats", "-rl", "75", "-c", "50", "-timeout", "10s", "-retries", "1"]
+            if os.path.isdir(NUCLEI_TEMPLATES_DIR):
+                cmd.extend(["-t", NUCLEI_TEMPLATES_DIR])
+            subprocess.run(cmd, check=False)
+        except:
+            return None
+        return out_path if os.path.isfile(out_path) else None
+    finally:
+        try:
+            os.remove(p)
+        except:
+            pass
+
+def load_kaggle_ns(host: str):
+    nb_path = os.path.join(os.getcwd(), "BlackLightAI.ipynb")
+    if not os.path.isfile(nb_path):
+        return None
+    try:
+        with open(nb_path, "r", encoding="utf-8") as f:
+            nb = json.load(f)
+        cells = nb.get("cells", [])
+        selected = []
+        blocklist = (
+            "apt-get", "wget ", "/usr/local/go", "go install",
+            "rm -rf ", "git clone", "IFrame(", "if __name__ == \"__main__\""
+        )
+        for c in cells:
+            if c.get("cell_type") != "code":
+                continue
+            src = c.get("source", "")
+            if not isinstance(src, str):
+                src = "".join(src)
+            if any(x in src for x in blocklist):
+                continue
+            if any(k in src for k in (
+                "HTML_TEMPLATE",
+                "class GeminiClient",
+                "def html_escape",
+                "@dataclass\nclass Finding",
+                "def parser_agent",
+                "def enrich_and_score_agent",
+                "def reporter_agent",
+                "def export_pdf",
+                "RUN_LIVE_SCAN =",
+                "RAW_DIR =",
+                "OUTPUT_DIR ="
+            )):
+                selected.append(src)
+        if not selected:
+            return None
+        ns = {"json": json, "os": os}
+        code = "\n\n".join(selected)
+        try:
+            exec(code, ns)
+        except Exception:
+            return None
+        try:
+            ns["RUN_LIVE_SCAN"] = True
+            ns["OUTPUT_DIR"] = OUTPUT_DIR
+            ns["TARGET_DOMAIN"] = host or "example.com"
+        except Exception:
+            pass
+        return ns
+    except Exception:
+        return None
+
+def run_kaggle_only(url: str, host: str) -> Optional[str]:
+    ns = load_kaggle_ns(host)
+    if not ns:
+        return None
+    parser_fn = ns.get("parser_agent")
+    score_fn = ns.get("enrich_and_score_agent")
+    reporter_fn = ns.get("reporter_agent")
+    export_pdf_fn = ns.get("export_pdf")
+    if not (callable(parser_fn) and callable(score_fn) and callable(reporter_fn)):
+        return None
+    scan_path = RAW_SCAN_PATH
+    try:
+        if os.path.isfile(UPLOADED_SCAN_PATH):
+            scan_path = UPLOADED_SCAN_PATH
+        elif os.path.isfile(RAW_SCAN_PATH):
+            scan_path = RAW_SCAN_PATH
+        else:
+            assets = discover_assets(host) if host else []
+            live_path = run_nuclei(assets) if assets else None
+            if live_path and os.path.isfile(live_path):
+                scan_path = live_path
+    except Exception:
+        pass
+    findings = parser_fn(scan_path)
+    try:
+        if host:
+            original = findings
+            filtered = [f for f in findings if isinstance(getattr(f, "host", ""), str) and (host in getattr(f, "host", ""))]
+            findings = filtered if filtered else original
+    except Exception:
+        pass
+    findings = score_fn(findings)
+    report_path = reporter_fn(findings)
+    try:
+        if report_path and os.path.isfile(report_path):
+            with open(report_path, "r", encoding="utf-8") as f:
+                html = f.read()
+            site = host or "example.com"
+            target = url or f"https://{site}"
+            import re as _re
+            html = _re.sub(r"(<title>Web Application Security Assessment Report - )(.+?)(</title>)", rf"\1{site}\3", html)
+            html = _re.sub(r"(<h1>Web Application Security Assessment Report — )(.+?)(</h1>)", rf"\1{site}\3", html)
+            html = _re.sub(r"(<div class=\"page-footer\">\s*<div>)(.+?)( Security Assessment</div>)", rf"\1{site}\3", html)
+            html = _re.sub(r"(<p><strong>Target URL:</strong>\s*)(.+?)(</p>)", rf"\1{target}\3", html)
+            html = _re.sub(r"(<div><strong>Target:</strong>\s*)(.+?)(</div>)", rf"\1{target}\3", html)
+            html = _re.sub(r"(<p>A targeted security assessment was conducted on <strong>)(.+?)(</strong> to identify)", rf"\1{site}\3", html)
+            html = html.replace("ExampleSite", site)
+            html = html.replace("https://example.com", target)
+            with open(report_path, "w", encoding="utf-8") as f:
+                f.write(html)
+    except Exception:
+        pass
+    try:
+        if callable(export_pdf_fn):
+            export_pdf_fn(report_path)
+    except Exception:
+        pass
+    return report_path if os.path.isfile(report_path) else None
+
+@app.get("/api/tools-status")
+def tools_status():
+    nuc = shutil.which("nuclei")
+    if not nuc:
+        local = os.path.join(BIN_DIR, "nuclei.exe")
+        nuc = local if os.path.isfile(local) else None
+    ama = shutil.which("amass")
+    if not ama:
+        local = os.path.join(BIN_DIR, "amass.exe")
+        ama = local if os.path.isfile(local) else None
+    def ver(cmd):
+        try:
+            out = subprocess.run([cmd, "-version"], capture_output=True, text=True, timeout=5)
+            if out.returncode != 0:
+                out = subprocess.run([cmd, "--version"], capture_output=True, text=True, timeout=5)
+            return (out.stdout or out.stderr).strip().splitlines()[0] if (out.stdout or out.stderr) else None
+        except:
+            return None
+    live_path = os.path.join(OUTPUT_DIR, "live_scan.jsonl")
+    size = 0
+    if os.path.isfile(live_path):
+        try:
+            size = os.path.getsize(live_path)
+        except:
+            size = 0
+    return jsonify({
+        "nuclei_path": nuc,
+        "nuclei_version": ver(nuc) if nuc else None,
+        "amass_path": ama,
+        "amass_version": ver(ama) if ama else None,
+        "live_scan_exists": os.path.isfile(live_path),
+        "live_scan_size": size,
+        "uploaded_scan_exists": os.path.isfile(UPLOADED_SCAN_PATH),
+        "uploaded_scan_size": os.path.getsize(UPLOADED_SCAN_PATH) if os.path.isfile(UPLOADED_SCAN_PATH) else 0,
+    })
+
+@app.post("/api/upload-scan")
+def upload_scan():
+    if "file" not in request.files:
+        return jsonify({"error": "file is required"}), 400
+    f = request.files.get("file")
+    if not f or not f.filename:
+        return jsonify({"error": "invalid file"}), 400
+    name = f.filename.lower()
+    if not (name.endswith(".json") or name.endswith(".jsonl")):
+        return jsonify({"error": "must be .json or .jsonl"}), 400
+    tmp = tempfile.NamedTemporaryFile(delete=False)
+    try:
+        f.save(tmp.name)
+        with open(tmp.name, "rb") as src, open(UPLOADED_SCAN_PATH, "wb") as dst:
+            dst.write(src.read())
+        sz = os.path.getsize(UPLOADED_SCAN_PATH) if os.path.isfile(UPLOADED_SCAN_PATH) else 0
+        return jsonify({"ok": True, "path": UPLOADED_SCAN_PATH, "size": sz})
+    finally:
+        try:
+            os.remove(tmp.name)
+        except Exception:
+            pass
+
 @app.get("/api/generate-report")
 def generate_report():
     url = request.args.get("url", "").strip()
@@ -297,15 +518,9 @@ def generate_report():
         return jsonify({"error": "url is required"}), 400
 
     host = (urlparse(url).hostname or "")
-    findings = parser_agent(
-        UPLOADED_SCAN_PATH if os.path.isfile(UPLOADED_SCAN_PATH) else RAW_SCAN_PATH,
-        host if host else None
-    )
-    if not findings:
-        findings = parser_agent(RAW_SCAN_PATH, None)
-
-    findings = enrich_and_score_agent(findings)
-    report_path = reporter_agent(findings, site_name=host or "ExampleSite", target_url=url)
+    report_path = run_kaggle_only(url, host)
+    if not report_path:
+        return jsonify({"error": "kaggle notebook pipeline not available"}), 500
 
     return send_file(report_path, mimetype="text/html", as_attachment=True, download_name="report.html")
 

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Web Application Security Assessment Report - testphp.vulnweb.com</title>
+  <title>Web Application Security Assessment Report - demo.testfire.net</title>
 
   <style>
     :root{
@@ -117,7 +117,7 @@
   <section class="page page-break">
     <header class="report-header">
       <div class="title">
-        <h1>Web Application Security Assessment Report — testphp.vulnweb.com</h1>
+        <h1>Web Application Security Assessment Report — demo.testfire.net</h1>
         <p>Executive Summary & Scope</p>
       </div>
       <div class="doc-meta">
@@ -129,7 +129,7 @@
 
     <h2>1. Executive Summary (Bottom Line)</h2>
     <p>
-A targeted security assessment was conducted on <strong>testphp.vulnweb.com</strong> to identify
+A targeted security assessment was conducted on <strong>demo.testfire.net</strong> to identify
 vulnerabilities that could impact confidentiality, integrity, or availability.
 Testing combined automated scanning and manual verification focused on authentication,
 input handling, and  management.
@@ -144,7 +144,7 @@ The objective was to discover exploitable weaknesses before they can be abused.
         <span class="badge b-low">GOOD</span>
       </p>
       <p class="muted" style="margin-bottom:0">
-        The assessment identified <strong>0 Critical</strong>, <strong>0 High</strong>, <strong>0 Medium</strong>, and <strong>0 Low</strong> issues.
+        The assessment identified <strong>0 Critical</strong>, <strong>0 High</strong>, <strong>0 Medium</strong>, and <strong>2 Low</strong> issues.
       </p>
     </div>
 
@@ -178,7 +178,7 @@ The objective was to discover exploitable weaknesses before they can be abused.
     </tr>
     <tr class="severity-row">
       <td class="sev-low">Low</td>
-      <td>0</td>
+      <td>2</td>
       <td>Minor impact or low likelihood.</td>
     </tr>
   </tbody>
@@ -188,7 +188,7 @@ The objective was to discover exploitable weaknesses before they can be abused.
     <div class="grid-2">
       <div class="card">
         <h3 style="margin-top:0">Scope</h3>
-        <p><strong>Target URL:</strong> http://testphp.vulnweb.com</p>
+        <p><strong>Target URL:</strong> https://demo.testfire.net</p>
 <p><strong>Testing Period:</strong> 20 Nov – 22 Nov 2025</p>
 <p><strong>Environment:</strong> Production (non-destructive tests only)</p>
 <p><strong>Out of Scope:</strong> DoS/Stress testing, 3rd-party vendor systems</p>
@@ -206,7 +206,7 @@ The objective was to discover exploitable weaknesses before they can be abused.
     </div>
 
     <footer class="page-footer">
-      <div>testphp.vulnweb.com Security Assessment</div>
+      <div>demo.testfire.net Security Assessment</div>
       <div>Page 1 of 3</div>
     </footer>
   </section>
@@ -222,12 +222,47 @@ The objective was to discover exploitable weaknesses before they can be abused.
         <p>Critical & High Risk Issues</p>
       </div>
       <div class="doc-meta">
-        <div><strong>Target:</strong> http://testphp.vulnweb.com</div>
+        <div><strong>Target:</strong> https://demo.testfire.net</div>
         <div><strong>Version:</strong> v1.0</div>
       </div>
     </header>
 
     
+<div class="finding">
+  <div class="finding-header">
+    <div class="finding-title">1) Weak Cipher Suites Detection</div>
+    <div class="badge b-low">LOW</div>
+  </div>
+  <div class="finding-meta">Affected Host: <code>demo.testfire.net</code> • Template: <code>weak-cipher-suites</code></div>
+  <h3>Description</h3>
+  <p>No CVE tag; verify manually.</p>
+  <h3>Evidence / Proof of Concept (PoC)</h3>
+  <div class="poc"><code>demo.testfire.net:443</code></div>
+  <h3>Impact</h3>
+  <ul>
+    <li>Potential compromise depending on exploitability.</li>
+    <li>May affect confidentiality, integrity, or availability.</li>
+  </ul>
+</div>
+
+
+<div class="finding">
+  <div class="finding-header">
+    <div class="finding-title">2) Weak Cipher Suites Detection</div>
+    <div class="badge b-low">LOW</div>
+  </div>
+  <div class="finding-meta">Affected Host: <code>demo.testfire.net</code> • Template: <code>weak-cipher-suites</code></div>
+  <h3>Description</h3>
+  <p>No CVE tag; verify manually.</p>
+  <h3>Evidence / Proof of Concept (PoC)</h3>
+  <div class="poc"><code>demo.testfire.net:443</code></div>
+  <h3>Impact</h3>
+  <ul>
+    <li>Potential compromise depending on exploitability.</li>
+    <li>May affect confidentiality, integrity, or availability.</li>
+  </ul>
+</div>
+
 
     <div class="card">
       <h3 style="margin-top:0">Other Medium / Low Observations</h3>
@@ -235,7 +270,7 @@ The objective was to discover exploitable weaknesses before they can be abused.
     </div>
 
     <footer class="page-footer">
-      <div>testphp.vulnweb.com Security Assessment</div>
+      <div>demo.testfire.net Security Assessment</div>
       <div>Page 2 of 3</div>
     </footer>
   </section>
@@ -251,13 +286,38 @@ The objective was to discover exploitable weaknesses before they can be abused.
         <p>Fix Strategy, Risk Model, Closing Notes</p>
       </div>
       <div class="doc-meta">
-        <div><strong>Target:</strong> http://testphp.vulnweb.com</div>
+        <div><strong>Target:</strong> https://demo.testfire.net</div>
         <div><strong>Version:</strong> v1.0</div>
       </div>
     </header>
 
     <h2>1. Remediation Strategy (Fixes)</h2>
     
+<div class="finding">
+  <div class="finding-header">
+    <div class="finding-title">Recommendation for Finding 1: Weak Cipher Suites Detection</div>
+    <div class="badge b-low">LOW</div>
+  </div>
+  <ul>
+    <li>Patch or update affected component / dependency.</li>
+    <li>Validate and sanitize inputs; enforce allow-lists where possible.</li>
+    <li>Add monitoring and regression tests to prevent re-introduction.</li>
+  </ul>
+</div>
+
+
+<div class="finding">
+  <div class="finding-header">
+    <div class="finding-title">Recommendation for Finding 2: Weak Cipher Suites Detection</div>
+    <div class="badge b-low">LOW</div>
+  </div>
+  <ul>
+    <li>Patch or update affected component / dependency.</li>
+    <li>Validate and sanitize inputs; enforce allow-lists where possible.</li>
+    <li>Add monitoring and regression tests to prevent re-introduction.</li>
+  </ul>
+</div>
+
 
     <div class="card">
       <h3 style="margin-top:0">General Best Practices (Quick Wins)</h3>
@@ -300,7 +360,7 @@ The objective was to discover exploitable weaknesses before they can be abused.
     <h2>3. Conclusion</h2>
     <p>
 Applying the remediations in this report will significantly improve the security posture of
-<strong>testphp.vulnweb.com</strong>. A re-test is recommended after fixes are deployed.
+<strong>demo.testfire.net</strong>. A re-test is recommended after fixes are deployed.
 </p>
 
     <h2>4. Disclaimer</h2>
@@ -310,7 +370,7 @@ Applying the remediations in this report will significantly improve the security
     </p>
 
     <footer class="page-footer">
-      <div>testphp.vulnweb.com Security Assessment</div>
+      <div>demo.testfire.net Security Assessment</div>
       <div>Page 3 of 3</div>
     </footer>
   </section>
